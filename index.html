@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Neighborhood Map</title>
+    <!-- <script src="jquery-3.1.1.js"></script> -->
+    <script src="index.js"></script>
+    <!-- <script src="knockout.js"></script> -->
+  </head>
+  <body>
+    <style media="screen">
+      #map {
+        width:100%;
+        height: 2000px;
+      }
+    </style>
+    <div class="sidebar">
+      <form>
+        <label>Location</label>
+        <input type="text">
+      </form>
+    </div>
+    <div id="map"></div>
+    <script>
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 8
+        });
+      }
+    </script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA0mO2BsN9Wm_4nFofTOCp22XxDg5C6wtQ&callback=initMap">
+   </script>
+  </body>
+</html>
