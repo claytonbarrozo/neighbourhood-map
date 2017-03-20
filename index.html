@@ -3,40 +3,57 @@
   <head>
     <meta charset="utf-8">
     <title>Neighborhood Map</title>
-    <script src="node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="node_modules/knockout/build/output/knockout-latest.js"></script>
-    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="index.js"></script>
   </head>
   <body>
     <style media="screen">
       #map {
         width:100%;
-        height: 2000px;
+        height: 1000px;
+      }
+
+      .info_window script {
+        width: 200px;
+        height: 200px;
       }
     </style>
     <div class="row">
-      <div class="col-sm-4 mt-4">
-        <form class="w-100 px-4">
-          <input type="text" placeholder="Location" class="w-100 mb-4 pl-2">
-          <button class="btn btn-primary btn-sm btn-block">Find</button>
-        </form>
+      <div class="col-sm-3 mt-4">
+        <div class="ml-4">
+          <h2 class="mb-3">Locations</h2>
+          <div class="mb-3">
+            <button class="btn btn-primary" data-bind="click: show">Show Listings</button>
+            <button class="btn btn-secondary" data-bind="click: hide">Hide Listings</button>
+          </div>
+          <form>
+            <input type="text" placeholder="Find New York Location" value=""
+              class="w-100 pl-2" id="places-search">
+              <small>*Press enter key to go to desired location</small>
+          </form>
+          <div class="dropdown mb-4 mt-3">
+            <button class="btn btn-secondary dropdown-toggle" type="button"
+              id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Choose Location
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton"
+              data-bind="foreach: model">
+              <a class="dropdown-item" href="#" data-bind="text: title, click: $parent.alert"></a>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="col-sm-8">
+      <div class="col-sm-9">
         <div id="map"></div>
       </div>
     </div>
-    <script>
-      var map;
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: -34.397, lng: 150.644},
-          zoom: 8
-        });
-      }
-    </script>
-    <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA0mO2BsN9Wm_4nFofTOCp22XxDg5C6wtQ&callback=initMap">
+   <script src="node_modules/knockout/build/output/knockout-latest.debug.js"></script>
+   <script src="node_modules/jquery/dist/jquery.min.js"></script>
+   <script src="node_modules/tether/dist/js/tether.min.js"></script>
+   <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+   <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+   <script src="app.js"></script>
+   <script src="map.js"></script>
+   <script
+   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA0mO2BsN9Wm_4nFofTOCp22XxDg5C6wtQ&libraries=places&callback=initMap">
    </script>
   </body>
 </html>
