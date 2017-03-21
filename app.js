@@ -1,92 +1,61 @@
-var model = [
-  {
-    title: "New York City",
-    lati: 40.785091,
-    long: -73.968285
-  },
-  {
-    title: "Brooklyn",
-    lati: 40.650002,
-    long: -73.949997,
-    info: "This is Brooklyn"
-  },
-  {
-    title: "Manhattan",
-    lati: 40.758896,
-    long: -73.985130,
-    info: "This is Manhattan"
-  },
-  {
-    title: "Tribeca",
-    lati: 40.730610,
-    long: -73.935242,
-    info: "This is Tribeca"
-  }
-];
-
-// function loc(data) {
-//   this.title = ko.observable(data.title);
-//   this.lat = ko.observable(data.lat);
-//   this.long = ko.observable(data.long);
-//
-//   var latLong = this.lat + "," + this.long;
-// };
-var markers = [];
-function showMarkers () {
-  for (var i = 0; model.length; i++) {
-
-    var marker = new google.maps.Marker({
-      position: {lat: model[i].lati, lng: model[i].long},
-      map: map,
-      title: model[i].title
-    });
-
-    markers.push(marker);
-
-    for (var x = 0; x < markers.length; x++ ) {
-
-      var api = "https://maps.googleapis.com/maps/api/streetview?size=400x400&location="+ markers[x].lati + "," + markers[x].long + "&key=AIzaSyAoPcHJKmHh5DZ88pBOYUXL9D1WsGhEctg";
-      var contentString = "<h2>" + markers[x].title + "</h2><script src='"+ api +"'></script>";
-
-
-      var infowindow = new google.maps.InfoWindow({
-        content: contentString
-      });
-
-        function toggleBounce(marker) {
-        if (marker.getAnimation() !== null) {
-          marker.setAnimation(null);
-        } else {
-          marker.setAnimation(google.maps.Animation.BOUNCE);
-        }
-      };
-
-      google.maps.event.addListener(markers[x], 'click', (function (item) {
-        infowindow.open(map, item);
-        toggleBounce(item);
-      })(markers[x]));
-    };
-
-  };
+function loc(data) {
+  this.title = ko.observable(data.title);
+  this.lat = ko.observable(data.lat);
+  this.long = ko.observable(data.long);
 };
+
 
 function viewModel () {
   var self = this;
 
-  self.hide = function () {
+  this.places = ko.observableArray([]);
 
-  };
+  model.forEach(function (item) {
+    self.places.push(new loc(item));
+  });
 
-  self.show = function () {
-    showMarkers();
-  };
+  var marker;
+  var markers = [];
 
-  self.alert = function () {
-    map.setCenter(new google.maps.LatLng( this.lati, this.long ) );
+  this.places().forEach(function(item) {
+    marker = new google.maps.Marker({
+     position: new google.maps.LatLng(item.lat(),item.long()),
+     map: map,
+     title: item.title(),
+     animation: google.maps.Animation.DROP,
+  });
+
+  item.marker = marker;
+  var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35"
+  var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
+  var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe>";
+  var infowindow = new google.maps.InfoWindow({
+     content: contentString
+   });
+   item.marker.addListener('click', function () {
+     infowindow.open(map, item.marker);
+   });
+   markers.push(item.marker);
+  });
+
+  self.zoom = function () {
+    map.setCenter(new google.maps.LatLng(this.lat, this.long));
     map.setZoom(14);
 
     if (this.title === "New York City") {
       map.setZoom(9);
     }
+  };
+
+  self.hide = function () {
+    for (var i = 0; i < markers.length; i++) {
+      markers[i].setMap(null);
+    };
+  };
+
+  self.show = function () {
+    for (var i = 0; i < markers.length; i++) {
+      markers[i].setMap(map);
+    };
   };
 };

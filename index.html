@@ -11,9 +11,9 @@
         height: 1000px;
       }
 
-      .info_window script {
-        width: 200px;
-        height: 200px;
+      iframe {
+        width: 350px;
+        height: 250px;
       }
     </style>
     <div class="row">
@@ -32,11 +32,11 @@
           <div class="dropdown mb-4 mt-3">
             <button class="btn btn-secondary dropdown-toggle" type="button"
               id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Choose Location
+              Filter
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton"
               data-bind="foreach: model">
-              <a class="dropdown-item" href="#" data-bind="text: title, click: $parent.alert"></a>
+              <a class="dropdown-item" href="#" data-bind="text: title, click: $parent.zoom"></a>
             </div>
           </div>
         </div>
@@ -45,15 +45,16 @@
         <div id="map"></div>
       </div>
     </div>
+
    <script src="node_modules/knockout/build/output/knockout-latest.debug.js"></script>
    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+   <script src="app.js"></script>
+   <script src="map.js"></script>
    <script src="node_modules/tether/dist/js/tether.min.js"></script>
    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
-   <script src="app.js"></script>
-   <script src="map.js"></script>
    <script
-   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA0mO2BsN9Wm_4nFofTOCp22XxDg5C6wtQ&libraries=places&callback=initMap">
+   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&libraries=places&callback=initMap">
    </script>
   </body>
 </html>

@@ -1,6 +1,32 @@
 var map;
 var marker;
 
+var model = [
+  {
+    title: "New York City",
+    lat: 40.785091,
+    long: -73.968285
+  },
+  {
+    title: "Brooklyn",
+    lat: 40.650002,
+    long: -73.949997,
+    info: "This is Brooklyn"
+  },
+  {
+    title: "Manhattan",
+    lat: 40.758896,
+    long: -73.985130,
+    info: "This is Manhattan"
+  },
+  {
+    title: "Tribeca",
+    lat: 40.730610,
+    long: -73.935242,
+    info: "This is Tribeca"
+  }
+];
+
 function initMap() {
 
   map = new google.maps.Map(document.getElementById('map'), {
@@ -241,9 +267,7 @@ function initMap() {
       ]
   });
 
-  var options = {
-
-  };
+var markers = [];
 
   var input = document.getElementById('places-search');
   var searchBox = new google.maps.places.SearchBox(input);
@@ -252,8 +276,6 @@ function initMap() {
    searchBox.setBounds(map.getBounds());
  });
 
- var markers = [];
-
  searchBox.addListener('places_changed', function() {
   var places = searchBox.getPlaces();
 
@@ -261,14 +283,6 @@ function initMap() {
     return;
   }
 
-  // Clear out the old markers.
-  markers.forEach(function(marker) {
-    marker.setMap(null);
-  });
-
-  markers = [];
-
-   // For each place, get the icon, name and location.
    var bounds = new google.maps.LatLngBounds();
    places.forEach(function(place) {
      if (!place.geometry) {
@@ -299,7 +313,9 @@ function initMap() {
    map.fitBounds(bounds);
  });
 
-  showMarkers();
+  // showMarkers();
 
 };
-ko.applyBindings(new viewModel());
+$(document).ready(function () {
+  ko.applyBindings(new viewModel());
+});
