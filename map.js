@@ -313,8 +313,6 @@ var markers = [];
    map.fitBounds(bounds);
  });
 
-  // showMarkers();
-
 };
 $(document).ready(function () {
   ko.applyBindings(new viewModel());
