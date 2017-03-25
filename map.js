@@ -5,25 +5,32 @@ var model = [
   {
     title: "New York City",
     lat: 40.785091,
-    long: -73.968285
+    long: -73.968285,
+    placeId: "ChIJOwg_06VPwokRYv534QaPC8g"
   },
   {
     title: "Brooklyn",
     lat: 40.650002,
     long: -73.949997,
-    info: "This is Brooklyn"
+    placeId: "ChIJCSF8lBZEwokRhngABHRcdoI"
   },
   {
     title: "Manhattan",
     lat: 40.758896,
     long: -73.985130,
-    info: "This is Manhattan"
+    placeId: "ChIJYeZuBI9YwokRjMDs_IEyCwo"
   },
   {
     title: "Tribeca",
     lat: 40.730610,
     long: -73.935242,
-    info: "This is Tribeca"
+    placeId: "ChIJFaeLkx9awokRmCS-Bi9hU0U"
+  },
+  {
+    title: "Bronx",
+    lat: 40.837048,
+    long: -73.865433,
+    placeId: "ChIJsXxpOlWLwokRd1zxj6dDblU"
   }
 ];
 
@@ -267,7 +274,22 @@ function initMap() {
       ]
   });
 
-var markers = [];
+  var filters = [];
+
+  var service = new google.maps.places.PlacesService(map);
+  for (var t = 0; t< model.length; t++) {
+    service.getDetails({
+      placeId: model[t].placeId
+    }, function(place, status) {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        console.log(place);
+      }
+    });
+  }
+
+  var markers = [];
+  var infowindow = new google.maps.InfoWindow();
+
 
   var input = document.getElementById('places-search');
   var searchBox = new google.maps.places.SearchBox(input);

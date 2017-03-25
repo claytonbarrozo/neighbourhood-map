@@ -2,6 +2,7 @@ function loc(data) {
   this.title = ko.observable(data.title);
   this.lat = ko.observable(data.lat);
   this.long = ko.observable(data.long);
+  this.placeId = ko.observable(data.placeId);
 };
 
 
