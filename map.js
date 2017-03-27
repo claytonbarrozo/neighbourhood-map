@@ -3,34 +3,34 @@ var marker;
 
 var model = [
   {
-    title: "New York City",
+    title: "Broadway, New York",
     lat: 40.785091,
     long: -73.968285,
-    placeId: "ChIJOwg_06VPwokRYv534QaPC8g"
+    placeId: "ChIJ-wHkrBlawokRjCiym7MbolM"
   },
   {
-    title: "Brooklyn",
+    title: "Liberty Street, New York",
     lat: 40.650002,
     long: -73.949997,
-    placeId: "ChIJCSF8lBZEwokRhngABHRcdoI"
+    placeId: "ChIJURWoF5pYwokRIfXv4To528c"
   },
   {
-    title: "Manhattan",
+    title: "Times Square, Manhattan",
     lat: 40.758896,
     long: -73.985130,
-    placeId: "ChIJYeZuBI9YwokRjMDs_IEyCwo"
+    placeId: "ChIJmQJIxlVYwokRLgeuocVOGVU"
   },
   {
-    title: "Tribeca",
+    title: "Chambers Street, Tribeca",
     lat: 40.730610,
     long: -73.935242,
-    placeId: "ChIJFaeLkx9awokRmCS-Bi9hU0U"
+    placeId: "ChIJb6hWfh5awokRephP352eM2k"
   },
   {
-    title: "Bronx",
+    title: "Southern Blvd, Bronx",
     lat: 40.837048,
     long: -73.865433,
-    placeId: "ChIJsXxpOlWLwokRd1zxj6dDblU"
+    placeId: "ChIJDb5GdYX0wokRmd3O4Tzw7Fo"
   }
 ];
 
@@ -274,22 +274,26 @@ function initMap() {
       ]
   });
 
-  var filters = [];
-
+  var filter = [];
   var service = new google.maps.places.PlacesService(map);
+
   for (var t = 0; t< model.length; t++) {
     service.getDetails({
       placeId: model[t].placeId
-    }, function(place, status) {
+    },function(place, status) {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-        console.log(place);
-      }
+        $('.list').append('<div class="col-12"><button class="btn btn-secondary btn-block mt-3 rating_button">' + place.rating + '</button></div>');
+      };
+      $('.rating_button').click(function () {
+        map.setCenter(new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng()));
+        map.setZoom(14);
+      })
     });
-  }
+  };
+
 
   var markers = [];
   var infowindow = new google.maps.InfoWindow();
-
 
   var input = document.getElementById('places-search');
   var searchBox = new google.maps.places.SearchBox(input);
@@ -339,3 +343,65 @@ function initMap() {
 $(document).ready(function () {
   ko.applyBindings(new viewModel());
 });
+
+function loc(data) {
+  this.title = ko.observable(data.title);
+  this.lat = ko.observable(data.lat);
+  this.long = ko.observable(data.long);
+  this.placeId = ko.observable(data.placeId);
+};
+
+
+function viewModel () {
+  var self = this;
+
+  this.places = ko.observableArray([]);
+
+  model.forEach(function (item) {
+    self.places.push(new loc(item));
+  });
+
+  var marker;
+  var markers = [];
+
+  this.places().forEach(function(item) {
+    marker = new google.maps.Marker({
+     position: new google.maps.LatLng(item.lat(),item.long()),
+     map: map,
+     title: item.title(),
+     animation: google.maps.Animation.DROP,
+  });
+
+  item.marker = marker;
+  var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35"
+  var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
+  var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe>";
+
+  var infowindow = new google.maps.InfoWindow({
+     content: contentString
+   });
+
+   item.marker.addListener('click', function () {
+     infowindow.open(map, item.marker);
+   });
+
+   markers.push(item.marker);
+  });
+
+  self.zoom = function () {
+    map.setCenter(new google.maps.LatLng(this.lat, this.long));
+    map.setZoom(14);
+  };
+
+  self.hide = function () {
+    for (var i = 0; i < markers.length; i++) {
+      markers[i].setMap(null);
+    };
+  };
+
+  self.show = function () {
+    for (var i = 0; i < markers.length; i++) {
+      markers[i].setMap(map);
+    };
+  };
+};
