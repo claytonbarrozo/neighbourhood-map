@@ -283,6 +283,10 @@ function initMap() {
     },function(place, status) {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
         $('.list').append('<div class="col-12"><button class="btn btn-secondary btn-block mt-3 rating_button">' + place.rating + '</button></div>');
+      }
+      else if (status !== google.maps.places.PlacesServiceStatus.OK) {
+        console.error(status);
+        return;
       };
       $('.rating_button').click(function () {
         map.setCenter(new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng()));
@@ -339,69 +343,66 @@ function initMap() {
    map.fitBounds(bounds);
  });
 
-};
-$(document).ready(function () {
-  ko.applyBindings(new viewModel());
-});
-
-function loc(data) {
-  this.title = ko.observable(data.title);
-  this.lat = ko.observable(data.lat);
-  this.long = ko.observable(data.long);
-  this.placeId = ko.observable(data.placeId);
-};
+ function loc(data) {
+   this.title = ko.observable(data.title);
+   this.lat = ko.observable(data.lat);
+   this.long = ko.observable(data.long);
+   this.placeId = ko.observable(data.placeId);
+ };
 
 
-function viewModel () {
-  var self = this;
+ function viewModel () {
+   var self = this;
 
-  this.places = ko.observableArray([]);
+   this.places = ko.observableArray([]);
 
-  model.forEach(function (item) {
-    self.places.push(new loc(item));
-  });
-
-  var marker;
-  var markers = [];
-
-  this.places().forEach(function(item) {
-    marker = new google.maps.Marker({
-     position: new google.maps.LatLng(item.lat(),item.long()),
-     map: map,
-     title: item.title(),
-     animation: google.maps.Animation.DROP,
-  });
-
-  item.marker = marker;
-  var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35"
-  var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
-  var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe>";
-
-  var infowindow = new google.maps.InfoWindow({
-     content: contentString
+   model.forEach(function (item) {
+     self.places.push(new loc(item));
    });
 
-   item.marker.addListener('click', function () {
-     infowindow.open(map, item.marker);
+   var marker;
+   var markers = [];
+
+   this.places().forEach(function(item) {
+     marker = new google.maps.Marker({
+      position: new google.maps.LatLng(item.lat(),item.long()),
+      map: map,
+      title: item.title(),
+      animation: google.maps.Animation.DROP,
    });
 
-   markers.push(item.marker);
-  });
+   item.marker = marker;
+   var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35"
+   var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
+   var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe>";
 
-  self.zoom = function () {
-    map.setCenter(new google.maps.LatLng(this.lat, this.long));
-    map.setZoom(14);
-  };
+   var infowindow = new google.maps.InfoWindow({
+      content: contentString
+    });
 
-  self.hide = function () {
-    for (var i = 0; i < markers.length; i++) {
-      markers[i].setMap(null);
-    };
-  };
+    item.marker.addListener('click', function () {
+      infowindow.open(map, item.marker);
+    });
 
-  self.show = function () {
-    for (var i = 0; i < markers.length; i++) {
-      markers[i].setMap(map);
-    };
-  };
+    markers.push(item.marker);
+   });
+
+   self.zoom = function () {
+     map.setCenter(new google.maps.LatLng(this.lat, this.long));
+     map.setZoom(14);
+   };
+
+   self.hide = function () {
+     for (var i = 0; i < markers.length; i++) {
+       markers[i].setMap(null);
+     };
+   };
+
+   self.show = function () {
+     for (var i = 0; i < markers.length; i++) {
+       markers[i].setMap(map);
+     };
+   };
+ };
+ ko.applyBindings(new viewModel());
 };
