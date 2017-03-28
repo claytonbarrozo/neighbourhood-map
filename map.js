@@ -1,5 +1,4 @@
 var map;
-var marker;
 
 var model = [
   {
@@ -45,7 +44,7 @@ var model = [
 
 function initMap() {
 
-  map = new google.maps.Map(document.getElementById('map'), {
+  map = new google.maps.Map(document.getElementById("map"), {
     center: {lat: 40.785091, lng:  -73.968285},
     zoom: 9,
     styles: [
@@ -290,14 +289,14 @@ function initMap() {
    new google.maps.LatLng(-33.8474, 151.2631)
 );
 
-  var input = document.getElementById('places-search');
+  var input = document.getElementById("places-search");
 
   var autocomplete = new google.maps.places.Autocomplete(input);
 
-   autocomplete.bindTo('bounds', map);
+   autocomplete.bindTo("bounds", map);
    autocomplete.setOptions({strictBounds: defaultBounds});
 
-   google.maps.event.addListener(autocomplete, 'place_changed',function(){
+   google.maps.event.addListener(autocomplete, "place_changed",function(){
        var place = autocomplete.getPlace();
        if (!place.geometry){
            return;
@@ -316,7 +315,7 @@ function initMap() {
    this.lat = ko.observable(data.lat);
    this.long = ko.observable(data.long);
    this.placeId = ko.observable(data.placeId);
- };
+ }
 
 
  function viewModel () {
@@ -329,8 +328,6 @@ function initMap() {
    });
 
    var marker;
-   var markers = [];
-   var details;
 
    this.places().forEach(function(item) {
 
@@ -338,35 +335,35 @@ function initMap() {
       position: new google.maps.LatLng(item.lat(),item.long()),
       map: map,
       title: item.title(),
-      animation: google.maps.Animation.DROP,
+      animation: google.maps.Animation.DROP
     });
 
     item.marker = marker;
-    var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35"
-    var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
+    var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35";
+    var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, "");
 
      var data = "oauth_token=RUBS4MM0XF2RNDV5XE3VVHJUC50AUW0JN5BJ1Z3IGVCPE5WT&v=20131016&ll="+ item.lat() +","+ item.long() +"&section=food&novelty=new";
-     var one = data.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
+     var one = data.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, "");
 
      $.ajax({
        method: "GET",
-       url: 'https://api.foursquare.com/v2/venues/explore',
-       dataType: 'json',
+       url: "https://api.foursquare.com/v2/venues/explore",
+       dataType: "json",
        data: data,
        success: function(data) {
          var location = data.response.groups[0].items[0].venue.location;
          var details = data.response.groups[0].items[0].venue;
 
          var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe><h4 class='mt-3'>Recommended Food Joints in "+ item.marker.title +"</h4><div class='card mt-3'><div class='card-block'><h4>" + details.name +"</h4><h5>" + location.address +"</h5><h5>" + details.contact.formattedPhone +"</h5></div></div>";
-         var infowindow = new google.maps.InfoWindow({
+          infowindow = new google.maps.InfoWindow({
             content: contentString
           });
-          item.marker.addListener('click', function () {
+          item.marker.addListener("click", function () {
             infowindow.open(map, item.marker);
             this.setAnimation(google.maps.Animation.BOUNCE);
           });
 
-          google.maps.event.addDomListener(infowindow, 'closeclick', function() {
+          google.maps.event.addDomListener(infowindow, "closeclick", function() {
            item.marker.setAnimation(null);
          });
          markers.push(item.marker);
