@@ -316,7 +316,6 @@ function initMap() {
    this.lat = ko.observable(data.lat);
    this.long = ko.observable(data.long);
    this.placeId = ko.observable(data.placeId);
-   this.rating = ko.observable(data.rating);
  };
 
 
@@ -333,54 +332,49 @@ function initMap() {
    var markers = [];
    var details;
 
-   var CLIENT_ID = "UN3B3NKWKX1WYWCHUK2XTQMKSZPBYONWT1XWWYFH1PLVLDFN";
-   var CLIENT_SECRET = "MIQHQZYKLXECQAPVJ4LJFSJ3W2LNKWO0WXBFDP3EMJ5NWS3I";
-
-   model.forEach(function(item){
-    $.ajax({
-           url: 'https://api.foursquare.com/v2/venues/explore',
-           dataType: 'json',
-           data: 'limit=1&ll='+item.lat+','+item.lng+ '&query=' + item.title +'&client_id='+CLIENT_ID+'&client_secret='+CLIENT_SECRET+'&v=20140806&m=foursquare',
-           async: true,
-           success: function(data) {
-             item.rating = data.response.groups[0].items[0].venue.rating;
-             console.log(data.response.groups[0].items[0].venue.rating);
-           }
-           ,
-           error: function(data) {
-               alert("Could not load data from foursquare!");
-           }
-     });
-   });
-
    this.places().forEach(function(item) {
+
      marker = new google.maps.Marker({
       position: new google.maps.LatLng(item.lat(),item.long()),
       map: map,
       title: item.title(),
       animation: google.maps.Animation.DROP,
-   });
-
-
-   item.marker = marker;
-   var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35"
-   var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
-   var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe>";
-
-   var infowindow = new google.maps.InfoWindow({
-      content: contentString
     });
 
-    item.marker.addListener('click', function () {
-      infowindow.open(map, item.marker);
-      this.setAnimation(google.maps.Animation.BOUNCE);
-    });
+    item.marker = marker;
+    var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35"
+    var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
 
-    google.maps.event.addDomListener(infowindow, 'closeclick', function() {
-     item.marker.setAnimation(null);
-   });
+     var data = "oauth_token=RUBS4MM0XF2RNDV5XE3VVHJUC50AUW0JN5BJ1Z3IGVCPE5WT&v=20131016&ll="+ item.lat() +","+ item.long() +"&section=food&novelty=new";
+     var one = data.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
 
-    markers.push(item.marker);
+     $.ajax({
+       method: "GET",
+       url: 'https://api.foursquare.com/v2/venues/explore',
+       dataType: 'json',
+       data: data,
+       success: function(data) {
+         var location = data.response.groups[0].items[0].venue.location;
+         var details = data.response.groups[0].items[0].venue;
+
+         var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe><h4 class='mt-3'>Recommended Food Joints in "+ item.marker.title +"</h4><div class='card mt-3'><div class='card-block'><h4>" + details.name +"</h4><h5>" + location.address +"</h5><h5>" + details.contact.formattedPhone +"</h5></div></div>";
+         var infowindow = new google.maps.InfoWindow({
+            content: contentString
+          });
+          item.marker.addListener('click', function () {
+            infowindow.open(map, item.marker);
+            this.setAnimation(google.maps.Animation.BOUNCE);
+          });
+
+          google.maps.event.addDomListener(infowindow, 'closeclick', function() {
+           item.marker.setAnimation(null);
+         });
+         markers.push(item.marker);
+       },
+       error: function(data) {
+         console.log("Could not load data from foursquare!");
+       }
+     });
    });
 
 
