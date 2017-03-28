@@ -1,13 +1,17 @@
 var map;
-
-var url = "https://maps.googleapis.com/maps/api/js?key=AIzaSyBy1J1ETIPkv0fdfMCl9S8XhFRfa_5Vy4&libraries=places&callback=initMap";
-
+/**
+ * function that deals with google error.
+ * Calls the addMessage() passing the message variable as a parameter.
+ */
 function googleError() {
   var message = "Failed to load Google Map, Try Again Later";
 
   addMessage(message);
 };
 
+/**
+ * Passes in a text parameter that gets appended to the #map element
+ */
 function addMessage(text) {
   var paragraph = '<p class="">' +
     text +
@@ -16,6 +20,10 @@ function addMessage(text) {
   $('#map').append(paragraph);
 };
 
+/**
+ * Array of objects
+ * @type {Array}
+ */
 var model = [
   {
     title: "Chambers Street, Tribeca",
@@ -55,8 +63,15 @@ var model = [
   }
 ];
 
+/**
+ * Init function that deals with loading the map, markers and infowindows.
+ * Any non-google api calls are also in this function.
+ */
 function initMap() {
-
+/**
+ * Assigning new value the map variable. Defining new google map, with center, zoom
+ * and styles set.
+ */
   map = new google.maps.Map(document.getElementById("map"), {
     center: {lat: 40.785091, lng:  -73.968285},
     zoom: 9,
@@ -295,20 +310,53 @@ function initMap() {
       ]
   });
 
+/**
+ * Define empty array
+ * @type {Array}
+ */
   var markers = [];
+
+  /**
+   * Store new instance of google infoWindow in infowindow variable
+   * @type {google}
+   */
   var infowindow = new google.maps.InfoWindow();
+
+  /**
+   * New instance of LatLngBounds stored in defaultBounds variable. Ready to be passed
+   * in when restricting search on autocomplete.
+   * @type {google}
+   */
   var defaultBounds = new google.maps.LatLngBounds(
    new google.maps.LatLng(-33.8902, 151.1759),
    new google.maps.LatLng(-33.8474, 151.2631)
 );
 
+/**
+ * Get place-search element by ID
+ */
   var input = document.getElementById("places-search");
 
+/**
+ * New instance of place.Autocomplete stored in autocomplete variable.
+ * Passing in input as a parameter.
+ * @type {google}
+ */
   var autocomplete = new google.maps.places.Autocomplete(input);
 
+  /**
+   * bind the maps bounds property to the autocomplete object.
+   */
    autocomplete.bindTo("bounds", map);
+
+   /**
+    * Restrict the bounds to the defined bounds (defaultBounds)
+    */
    autocomplete.setOptions({strictBounds: defaultBounds});
 
+/**
+ * Add event listener to the autocomplete object.
+ */
    google.maps.event.addListener(autocomplete, "place_changed",function(){
        var place = autocomplete.getPlace();
        if (!place.geometry){
@@ -322,7 +370,9 @@ function initMap() {
        }
    });
 
-
+/**
+ * Location function that declares location propertys as observables.
+ */
  function loc(data) {
    this.title = ko.observable(data.title);
    this.lat = ko.observable(data.lat);
@@ -332,19 +382,39 @@ function initMap() {
  }
 
 
+/**
+ * Viewmodel function that deals with creating map markers and ajax requests.
+ */
  function viewModel () {
    var self = this;
 
+   /**
+    * this.places is equal to an empty observableArray.
+    */
    this.places = ko.observableArray([]);
 
+/**
+ * foreach object in model, push new instance of 'loc', passing in item as a parameter.
+ */
    model.forEach(function (item) {
      self.places.push(new loc(item));
    });
 
+   /**
+    * declare variable.
+    */
    var marker;
 
+   /**
+    * foreach item in this.places() run this function and pass in item as a parameter.
+    */
    this.places().forEach(function(item) {
 
+     /**
+      * new instance of marker object.
+      * Sets the position, map, title and animation.
+      * @type {google}
+      */
      marker = new google.maps.Marker({
       position: new google.maps.LatLng(item.lat(),item.long()),
       map: map,
@@ -352,13 +422,38 @@ function initMap() {
       animation: google.maps.Animation.DROP
     });
 
+    /**
+     * item.marker equates to marker.
+     */
     item.marker = marker;
+
+    /**
+     * store api in variable, format the api and store inside format variable.
+     * @type {String}
+     */
     var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35";
     var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, "");
 
-     var data = "oauth_token=RUBS4MM0XF2RNDV5XE3VVHJUC50AUW0JN5BJ1Z3IGVCPE5WT&v=20131016&ll="+ item.lat() +","+ item.long() +"&section=food&novelty=new";
-     var one = data.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, "");
+    /**
+     * data variable that stores the data sting.
+     * Pass in item.lat and long
+     * @type {String}
+     */
+    var data = "oauth_token=RUBS4MM0XF2RNDV5XE3VVHJUC50AUW0JN5BJ1Z3IGVCPE5WT&v=20131016&ll="+ item.lat() +","+ item.long() +"&section=food&novelty=new";
 
+    /**
+     * Ajax request that request venue information from four square.
+     *
+     * All infowindow code is nested inside of the success function.
+     * Pass in the item.marker.title, formatted api and teh venue details for
+     * each location. Store that string in contentString variable.
+     *
+     * Set the infowindow content with contentString.
+     *
+     * push item.marker to the markers array.
+     *
+     * If ajax request throws an error then alert the following string.
+     */
      $.ajax({
        method: "GET",
        url: "https://api.foursquare.com/v2/venues/explore",
@@ -383,32 +478,56 @@ function initMap() {
          markers.push(item.marker);
        },
        error: function(data) {
-         console.log("Could not load data from foursquare!");
+         alert("Could not load data from foursquare!");
        }
      });
    });
 
+   /**
+    * zoom function that, when called, will change the center of the map to the
+    * lat and long passed in and change the zoom level.
+    */
    self.zoom = function () {
      map.setCenter(new google.maps.LatLng(this.lat, this.long));
      map.setZoom(14);
    };
 
+   /**
+    * reset function that, when called, will reset the zoom level to show all the markers.
+    */
    self.reset = function () {
      map.setZoom(9);
    };
 
+   /**
+    * hide function that, when called, will loop through the markers array and
+    * will set the map property for each marker to null.
+    */
    self.hide = function () {
      for (var i = 0; i < markers.length; i++) {
        markers[i].setMap(null);
      };
    };
 
+   /**
+    * show function that, when called will loop through the markers array and will
+    * set the map property for each marker to the map object.
+    * @return {[type]} [description]
+    */
    self.show = function () {
      for (var i = 0; i < markers.length; i++) {
        markers[i].setMap(map);
      };
    };
  };
+
+ /**
+  * store new instance of viewmodel object inside function.
+  */
  var viewModelOb = new viewModel();
+
+ /**
+  * apply bindings to view model object.
+  */
  ko.applyBindings(viewModelOb);
 };
