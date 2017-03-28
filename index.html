@@ -20,11 +20,13 @@
               <small>*Press enter key to go to desired location</small>
           </form>
           <h5 class="mt-3">Filter by Rating</h5>
-          <ul class="list pl-1" data-bind="foreach: model">
-            <button data-bind="text: $data.rating, click: $parent.zoom"
-              class="btn btn-secondary btn-block mt-3 rating_button">
-            </button>
-          </ul>
+          <div class="row pl-1" data-bind="foreach: model">
+            <div class="col-4">
+              <button data-bind="text: $data.rating, click: $parent.zoom"
+                class="btn btn-secondary mt-3 w-100">
+              </button>
+            </div>
+          </div>
           <div class="location_list">
             <h5 class="mt-3">Filter by Location Name</h5>
             <div class="row">
@@ -39,7 +41,7 @@
           </div>
           <button class="btn btn-warning btn-sm float-right"
             data-bind="click: reset">
-            See All Markers
+            Reset
           </button>
         </div>
       </div>
@@ -53,7 +55,7 @@
    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
    <link href="map.css" rel="stylesheet">
    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
-   <script async
+   <script async onerror="googleError()"
    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&libraries=places&callback=initMap">
    </script>
    <script src="map.js"></script>

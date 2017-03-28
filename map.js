@@ -1,36 +1,28 @@
 var map;
 
+var url = "https://maps.googleapis.com/maps/api/js?key=AIzaSyBy1J1ETIPkv0fdfMCl9S8XhFRfa_5Vy4&libraries=places&callback=initMap";
+
+function googleError() {
+  var message = "Failed to load Google Map, Try Again Later";
+
+  addMessage(message);
+};
+
+function addMessage(text) {
+  var paragraph = '<p class="">' +
+    text +
+    '</p>';
+
+  $('#map').append(paragraph);
+};
+
 var model = [
-  {
-    title: "Broadway, New York",
-    lat: 40.785091,
-    long: -73.968285,
-    placeId: "ChIJ-wHkrBlawokRjCiym7MbolM",
-    rating: ""
-  },
-
-  {
-    title: "Liberty Street, New York",
-    lat: 40.650002,
-    long: -73.949997,
-    placeId: "ChIJURWoF5pYwokRIfXv4To528c",
-    rating: ""
-  },
-
-  {
-    title: "Times Square, Manhattan",
-    lat: 40.758896,
-    long: -73.985130,
-    placeId: "ChIJmQJIxlVYwokRLgeuocVOGVU",
-    rating: ""
-  },
-
   {
     title: "Chambers Street, Tribeca",
     lat: 40.730610,
     long: -73.935242,
     placeId: "ChIJb6hWfh5awokRephP352eM2k",
-    rating: ""
+    rating: "3.4"
   },
 
   {
@@ -38,7 +30,28 @@ var model = [
     lat: 40.837048,
     long: -73.865433,
     placeId: "ChIJDb5GdYX0wokRmd3O4Tzw7Fo",
-    rating: ""
+    rating: "3.9"
+  },
+  {
+    title: "Liberty Street, New York",
+    lat: 40.650002,
+    long: -73.949997,
+    placeId: "ChIJURWoF5pYwokRIfXv4To528c",
+    rating: "4.2"
+  },
+  {
+    title: "Broadway, New York",
+    lat: 40.785091,
+    long: -73.968285,
+    placeId: "ChIJ-wHkrBlawokRjCiym7MbolM",
+    rating: "4.5"
+  },
+  {
+    title: "Times Square, Manhattan",
+    lat: 40.758896,
+    long: -73.985130,
+    placeId: "ChIJmQJIxlVYwokRLgeuocVOGVU",
+    rating: "4.6"
   }
 ];
 
@@ -315,6 +328,7 @@ function initMap() {
    this.lat = ko.observable(data.lat);
    this.long = ko.observable(data.long);
    this.placeId = ko.observable(data.placeId);
+   this.rating = ko.observable(data.rating);
  }
 
 
@@ -374,7 +388,6 @@ function initMap() {
      });
    });
 
-
    self.zoom = function () {
      map.setCenter(new google.maps.LatLng(this.lat, this.long));
      map.setZoom(14);
@@ -396,5 +409,6 @@ function initMap() {
      };
    };
  };
- ko.applyBindings(new viewModel());
+ var viewModelOb = new viewModel();
+ ko.applyBindings(viewModelOb);
 };
