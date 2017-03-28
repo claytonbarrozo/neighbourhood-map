@@ -3,19 +3,9 @@
   <head>
     <meta charset="utf-8">
     <title>Neighborhood Map</title>
+    <meta name="viewport" content="initial-scale=1">
   </head>
   <body>
-    <style media="screen">
-      #map {
-        width:100%;
-        height: 1000px;
-      }
-
-      iframe {
-        width: 350px;
-        height: 250px;
-      }
-    </style>
     <div class="row">
       <div class="col-sm-3 mt-4">
         <div class="ml-4">
@@ -29,9 +19,28 @@
               class="w-100 pl-2" id="places-search">
               <small>*Press enter key to go to desired location</small>
           </form>
-          <h5 class="mt-3">Filter by rating</h5>
-          <ul class="list row pl-1">
+          <h5 class="mt-3">Filter by Rating</h5>
+          <ul class="list pl-1" data-bind="foreach: model">
+            <button data-bind="text: $data.rating, click: $parent.zoom"
+              class="btn btn-secondary btn-block mt-3 rating_button">
+            </button>
           </ul>
+          <div class="location_list">
+            <h5 class="mt-3">Filter by Location Name</h5>
+            <div class="row">
+              <div class="col-12">
+                <ul class="list-group" data-bind="foreach: model">
+                  <button class="btn btn-secondary btn-block list-group-item"
+                    data-bind="text: $data.title, click: $parent.zoom">
+                  </button>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-warning btn-sm float-right"
+            data-bind="click: reset">
+            See All Markers
+          </button>
         </div>
       </div>
       <div class="col-sm-9">
@@ -42,6 +51,7 @@
    <script src="node_modules/jquery/dist/jquery.min.js"></script>
    <script src="node_modules/tether/dist/js/tether.min.js"></script>
    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+   <link href="map.css" rel="stylesheet">
    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
    <script async
    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&libraries=places&callback=initMap">

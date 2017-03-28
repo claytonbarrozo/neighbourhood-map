@@ -6,31 +6,40 @@ var model = [
     title: "Broadway, New York",
     lat: 40.785091,
     long: -73.968285,
-    placeId: "ChIJ-wHkrBlawokRjCiym7MbolM"
+    placeId: "ChIJ-wHkrBlawokRjCiym7MbolM",
+    rating: ""
   },
+
   {
     title: "Liberty Street, New York",
     lat: 40.650002,
     long: -73.949997,
-    placeId: "ChIJURWoF5pYwokRIfXv4To528c"
+    placeId: "ChIJURWoF5pYwokRIfXv4To528c",
+    rating: ""
   },
+
   {
     title: "Times Square, Manhattan",
     lat: 40.758896,
     long: -73.985130,
-    placeId: "ChIJmQJIxlVYwokRLgeuocVOGVU"
+    placeId: "ChIJmQJIxlVYwokRLgeuocVOGVU",
+    rating: ""
   },
+
   {
     title: "Chambers Street, Tribeca",
     lat: 40.730610,
     long: -73.935242,
-    placeId: "ChIJb6hWfh5awokRephP352eM2k"
+    placeId: "ChIJb6hWfh5awokRephP352eM2k",
+    rating: ""
   },
+
   {
     title: "Southern Blvd, Bronx",
     lat: 40.837048,
     long: -73.865433,
-    placeId: "ChIJDb5GdYX0wokRmd3O4Tzw7Fo"
+    placeId: "ChIJDb5GdYX0wokRmd3O4Tzw7Fo",
+    rating: ""
   }
 ];
 
@@ -274,80 +283,40 @@ function initMap() {
       ]
   });
 
-  var filter = [];
-  var service = new google.maps.places.PlacesService(map);
-
-  for (var t = 0; t< model.length; t++) {
-    service.getDetails({
-      placeId: model[t].placeId
-    },function(place, status) {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        $('.list').append('<div class="col-12"><button class="btn btn-secondary btn-block mt-3 rating_button">' + place.rating + '</button></div>');
-      }
-      else if (status !== google.maps.places.PlacesServiceStatus.OK) {
-        console.error(status);
-        return;
-      };
-      $('.rating_button').click(function () {
-        map.setCenter(new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng()));
-        map.setZoom(14);
-      })
-    });
-  };
-
-
   var markers = [];
   var infowindow = new google.maps.InfoWindow();
+  var defaultBounds = new google.maps.LatLngBounds(
+   new google.maps.LatLng(-33.8902, 151.1759),
+   new google.maps.LatLng(-33.8474, 151.2631)
+);
 
   var input = document.getElementById('places-search');
-  var searchBox = new google.maps.places.SearchBox(input);
 
-  map.addListener('bounds_changed', function() {
-   searchBox.setBounds(map.getBounds());
- });
+  var autocomplete = new google.maps.places.Autocomplete(input);
 
- searchBox.addListener('places_changed', function() {
-  var places = searchBox.getPlaces();
+   autocomplete.bindTo('bounds', map);
+   autocomplete.setOptions({strictBounds: defaultBounds});
 
-  if (places.length == 0) {
-    return;
-  }
-
-   var bounds = new google.maps.LatLngBounds();
-   places.forEach(function(place) {
-     if (!place.geometry) {
-       console.log("Returned place contains no geometry");
-       return;
-     }
-     var icon = {
-       url: place.icon,
-       size: new google.maps.Size(71, 71),
-       origin: new google.maps.Point(0, 0),
-       anchor: new google.maps.Point(17, 34),
-       scaledSize: new google.maps.Size(25, 25)
-     };
-
-     markers.push(new google.maps.Marker({
-       map: map,
-       icon: icon,
-       title: place.name,
-       position: place.geometry.location
-     }));
-
-     if (place.geometry.viewport) {
-       bounds.union(place.geometry.viewport);
-     } else {
-       bounds.extend(place.geometry.location);
-     }
+   google.maps.event.addListener(autocomplete, 'place_changed',function(){
+       var place = autocomplete.getPlace();
+       if (!place.geometry){
+           return;
+       }
+       if (place.geometry.viewport) {
+           map.fitBounds(place.geometry.viewport);
+       } else {
+           map.setCenter(place.geometry.location);
+           map.setZoom(17);
+       }
    });
-   map.fitBounds(bounds);
- });
+
 
  function loc(data) {
    this.title = ko.observable(data.title);
    this.lat = ko.observable(data.lat);
    this.long = ko.observable(data.long);
    this.placeId = ko.observable(data.placeId);
+   this.rating = ko.observable(data.rating);
  };
 
 
@@ -362,6 +331,7 @@ function initMap() {
 
    var marker;
    var markers = [];
+   var details;
 
    this.places().forEach(function(item) {
      marker = new google.maps.Marker({
@@ -371,10 +341,12 @@ function initMap() {
       animation: google.maps.Animation.DROP,
    });
 
+
    item.marker = marker;
    var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35"
    var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
-   var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe>";
+   var twitter = "hello";
+   var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe><div>"+ twitter +"</div>";
 
    var infowindow = new google.maps.InfoWindow({
       content: contentString
@@ -382,14 +354,24 @@ function initMap() {
 
     item.marker.addListener('click', function () {
       infowindow.open(map, item.marker);
+      this.setAnimation(google.maps.Animation.BOUNCE);
     });
+
+    google.maps.event.addDomListener(infowindow, 'closeclick', function() {
+     item.marker.setAnimation(null);
+   });
 
     markers.push(item.marker);
    });
 
+
    self.zoom = function () {
      map.setCenter(new google.maps.LatLng(this.lat, this.long));
      map.setZoom(14);
+   };
+
+   self.reset = function () {
+     map.setZoom(9);
    };
 
    self.hide = function () {
