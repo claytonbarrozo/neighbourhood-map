@@ -333,6 +333,26 @@ function initMap() {
    var markers = [];
    var details;
 
+   var CLIENT_ID = "UN3B3NKWKX1WYWCHUK2XTQMKSZPBYONWT1XWWYFH1PLVLDFN";
+   var CLIENT_SECRET = "MIQHQZYKLXECQAPVJ4LJFSJ3W2LNKWO0WXBFDP3EMJ5NWS3I";
+
+   model.forEach(function(item){
+    $.ajax({
+           url: 'https://api.foursquare.com/v2/venues/explore',
+           dataType: 'json',
+           data: 'limit=1&ll='+item.lat+','+item.lng+ '&query=' + item.title +'&client_id='+CLIENT_ID+'&client_secret='+CLIENT_SECRET+'&v=20140806&m=foursquare',
+           async: true,
+           success: function(data) {
+             item.rating = data.response.groups[0].items[0].venue.rating;
+             console.log(data.response.groups[0].items[0].venue.rating);
+           }
+           ,
+           error: function(data) {
+               alert("Could not load data from foursquare!");
+           }
+     });
+   });
+
    this.places().forEach(function(item) {
      marker = new google.maps.Marker({
       position: new google.maps.LatLng(item.lat(),item.long()),
@@ -345,8 +365,7 @@ function initMap() {
    item.marker = marker;
    var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35"
    var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, '');
-   var twitter = "hello";
-   var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe><div>"+ twitter +"</div>";
+   var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe>";
 
    var infowindow = new google.maps.InfoWindow({
       content: contentString
