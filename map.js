@@ -383,6 +383,9 @@ function initMap() {
          location.marker.setMap(map);
          return location.title;
        } else if(self.query().toLowerCase() === "") {
+         for (var i = 0; i < markers.length; i++) {
+           markers[i].setMap(map);
+         }
          return location.title;
        }
      });
@@ -411,7 +414,6 @@ function initMap() {
     */
     model[i].marker = marker;
 
-    console.log(model[i].marker);
 
 
     /**
