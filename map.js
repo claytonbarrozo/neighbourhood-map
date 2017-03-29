@@ -357,15 +357,17 @@ function initMap() {
    * Declare observable which stores an empy string.
    */
   self.query = ko.observable('');
-
-
   /**
    * computed observable function which returns an array filter which passes in
    * the locations and checks to see if location title is the same as the text input.
    */
   self.search = ko.computed(function(){
-    return ko.utils.arrayFilter(self.location(), function(location){
-      return location.title.toLowerCase().indexOf(self.query().toLowerCase()) >= 0;
+    return ko.utils.arrayFilter(self.location(), function(location) {
+      if (location.title.toLowerCase().indexOf(self.query().toLowerCase()) >= 0) {
+        map.setZoom(13);
+        map.setCenter(new google.maps.LatLng(location.lat, location.long));
+        return location.title;
+      }
     });
   });
    /**
@@ -456,7 +458,9 @@ function initMap() {
         model[i].marker.addListener("click", function () {
           infowindow.setContent(contentString);
           infowindow.open(map, model[i].marker);
-          model[i].marker.setAnimation(google.maps.Animation.BOUNCE);
+          setTimeout (function () {
+            model[i].marker.setAnimation(google.maps.Animation.BOUNCE);
+          }, 700);
         });
 
         /**
@@ -466,7 +470,6 @@ function initMap() {
         self.zoom = function () {
           map.setCenter(new google.maps.LatLng(this.lat, this.long));
           map.setZoom(15);
-
           google.maps.event.trigger(this.marker, "click");
         };
       },
