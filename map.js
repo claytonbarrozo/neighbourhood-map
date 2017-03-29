@@ -395,10 +395,7 @@ function initMap() {
       * new instance of marker object.
       * Sets the position, map, title and animation.
       * @type {google}
-      /**
-      * model[i].marker equates to marker.
-      */
-      model[i].marker = marker;
+      **/
 
      marker = new google.maps.Marker({
       position: new google.maps.LatLng(item.lat(),item.long()),
@@ -407,12 +404,19 @@ function initMap() {
       animation: google.maps.Animation.DROP
     });
 
+    /**
+    * model[i].marker equates to marker.
+    */
+    model[i].marker = marker;
+
+    console.log(model[i].marker);
+
 
     /**
      * store api in variable, format the api and store inside format variable.
      * @type {String}
      */
-    var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ model[i].marker.position + "&heading=210&pitch=10&fov=35";
+    var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ model[i].lat + ","+ model[i].long +"&heading=210&pitch=10&fov=35";
     var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, "");
 
     /**
@@ -420,7 +424,7 @@ function initMap() {
      * Pass in item.lat and long
      * @type {String}
      */
-    var data = "oauth_token=RUBS4MM0XF2RNDV5XE3VVHJUC50AUW0JN5BJ1Z3IGVCPE5WT&v=20131016&ll="+ model[i].marker.position.lat() +","+ model[i].marker.position.lng() +"&section=food&novelty=new";
+    var data = "oauth_token=RUBS4MM0XF2RNDV5XE3VVHJUC50AUW0JN5BJ1Z3IGVCPE5WT&v=20131016&ll="+ model[i].lat +","+ model[i].long +"&section=food&novelty=new";
 
     /**
      * Ajax request that request venue information from four square.
@@ -452,7 +456,7 @@ function initMap() {
         model[i].marker.addListener("click", function () {
           infowindow.setContent(contentString);
           infowindow.open(map, model[i].marker);
-          this.setAnimation(google.maps.Animation.BOUNCE);
+          model[i].marker.setAnimation(google.maps.Animation.BOUNCE);
         });
 
         /**
@@ -467,14 +471,15 @@ function initMap() {
         };
       },
        error: function(data) {
-         alert("Could not load data from foursquare!");
+        //  alert("Could not load data from foursquare!");
        }
      });
 
      setTimeout(function () {
      google.maps.event.addDomListener(infowindow, "closeclick", function() {
-         item.marker.setAnimation(null);
+         model[i].marker.setAnimation(null);
     });
+
   }, 500);
     markers.push(model[i].marker);
 
