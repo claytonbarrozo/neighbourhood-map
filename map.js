@@ -320,15 +320,6 @@ function initMap() {
    */
   var infowindow = new google.maps.InfoWindow();
 
-  /**
-   * New instance of LatLngBounds stored in defaultBounds variable. Ready to be passed
-   * in when restricting search on autocomplete.
-   */
-  var defaultBounds = new google.maps.LatLngBounds(
-   new google.maps.LatLng(-33.8902, 151.1759),
-   new google.maps.LatLng(-33.8474, 151.2631)
-);
-
 /**
  * Location function that declares location propertys as observables.
  */
@@ -347,29 +338,6 @@ function initMap() {
  function viewModel () {
   var self = this;
 
-  /**
-   * declare self.points and store model array in observableArray.
-   */
-  self.location = ko.observableArray(model);
-
-
-  /**
-   * Declare observable which stores an empy string.
-   */
-  self.query = ko.observable('');
-  /**
-   * computed observable function which returns an array filter which passes in
-   * the locations and checks to see if location title is the same as the text input.
-   */
-  self.search = ko.computed(function(){
-    return ko.utils.arrayFilter(self.location(), function(location) {
-      if (location.title.toLowerCase().indexOf(self.query().toLowerCase()) >= 0) {
-        map.setZoom(13);
-        map.setCenter(new google.maps.LatLng(location.lat, location.long));
-        return location.title;
-      }
-    });
-  });
    /**
     * this.places is equal to an empty observableArray.
     */
@@ -387,6 +355,38 @@ function initMap() {
     * declare variable.
     */
    var marker;
+
+   /**
+    * declare self.points and store model array in observableArray.
+    */
+   self.location = ko.observableArray(model);
+
+
+   /**
+    * Declare observable which stores an empy string.
+    */
+   self.query = ko.observable('');
+   /**
+    * computed observable function which returns an array filter which passes in
+    * the locations and checks to see if location title is the same as the text input.
+    */
+   self.search = ko.computed(function(){
+     
+     for (var i = 0; i < markers.length; i++) {
+       markers[i].setMap(null);
+     }
+
+     return ko.utils.arrayFilter(self.location(), function(location) {
+       if (location.title.toLowerCase().indexOf(self.query().toLowerCase()) >= 0 && self.query().toLowerCase()) {
+         map.setZoom(10);
+         map.setCenter(new google.maps.LatLng(location.lat, location.long));
+         location.marker.setMap(map);
+         return location.title;
+       } else if(self.query().toLowerCase() === "") {
+         return location.title;
+       }
+     });
+   });
 
    /**
     * foreach item in this.places() run this function and pass in item as a parameter.
@@ -458,10 +458,12 @@ function initMap() {
         model[i].marker.addListener("click", function () {
           infowindow.setContent(contentString);
           infowindow.open(map, model[i].marker);
+          model[i].marker.setAnimation(google.maps.Animation.BOUNCE);
           window.setTimeout (function () {
-            model[i].marker.setAnimation(google.maps.Animation.BOUNCE);
+            model[i].marker.setAnimation(null);
           }, 700);
         });
+
 
         /**
         * zoom function that, when called, will change the center of the map to the
@@ -469,7 +471,7 @@ function initMap() {
         */
         self.zoom = function () {
           map.setCenter(new google.maps.LatLng(this.lat, this.long));
-          map.setZoom(15);
+          map.setZoom(10);
           google.maps.event.trigger(this.marker, "click");
         };
       },
