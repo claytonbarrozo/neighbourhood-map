@@ -389,13 +389,17 @@ function initMap() {
    /**
     * foreach item in this.places() run this function and pass in item as a parameter.
     */
-   this.places().forEach(function(item) {
+   this.places().forEach(function(item, i) {
 
      /**
       * new instance of marker object.
       * Sets the position, map, title and animation.
       * @type {google}
+      /**
+      * model[i].marker equates to marker.
       */
+      model[i].marker = marker;
+
      marker = new google.maps.Marker({
       position: new google.maps.LatLng(item.lat(),item.long()),
       map: map,
@@ -403,16 +407,12 @@ function initMap() {
       animation: google.maps.Animation.DROP
     });
 
-    /**
-     * item.marker equates to marker.
-     */
-    item.marker = marker;
 
     /**
      * store api in variable, format the api and store inside format variable.
      * @type {String}
      */
-    var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ item.marker.position + "&heading=210&pitch=10&fov=35";
+    var api = "https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&location="+ model[i].marker.position + "&heading=210&pitch=10&fov=35";
     var format = api.replace(/"/g,"").replace(/'/g,"").replace(/\(|\)/g,"").replace(/\s/g, "");
 
     /**
@@ -420,7 +420,7 @@ function initMap() {
      * Pass in item.lat and long
      * @type {String}
      */
-    var data = "oauth_token=RUBS4MM0XF2RNDV5XE3VVHJUC50AUW0JN5BJ1Z3IGVCPE5WT&v=20131016&ll="+ item.lat() +","+ item.long() +"&section=food&novelty=new";
+    var data = "oauth_token=RUBS4MM0XF2RNDV5XE3VVHJUC50AUW0JN5BJ1Z3IGVCPE5WT&v=20131016&ll="+ model[i].marker.position.lat() +","+ model[i].marker.position.lng() +"&section=food&novelty=new";
 
     /**
      * Ajax request that request venue information from four square.
@@ -444,26 +444,27 @@ function initMap() {
          var location = data.response.groups[0].items[0].venue.location;
          var details = data.response.groups[0].items[0].venue;
 
-         var contentString = "<h2>" + item.marker.title + "</h2><br>" +
+         var contentString = "<h2>" + model[i].marker.title + "</h2><br>" +
           "<iframe src='"+ format +"'></iframe><h4 class='mt-3'>" +
-          "Recommended Food Joints in "+ item.marker.title +"</h4><div class='card mt-3'>" +
+          "Recommended Food Joints in "+ model[i].marker.title +"</h4><div class='card mt-3'>" +
           "<div class='card-block'><h4>" + details.name + "</h4><h5>" + location.formattedAddress + "</h5><h5>" + details.contact.formattedPhone +"</h5></div></div>";
 
-          /**
-          * zoom function that, when called, will change the center of the map to the
-          * lat and long passed in and change the zoom level.
-          */
-          self.zoom = function () {
-            map.setCenter(new google.maps.LatLng(this.lat, this.long));
-            map.setZoom(15);
-          };
-          
-        item.marker.addListener("click", function () {
+        model[i].marker.addListener("click", function () {
           infowindow.setContent(contentString);
-          infowindow.open(map, item.marker);
+          infowindow.open(map, model[i].marker);
           this.setAnimation(google.maps.Animation.BOUNCE);
         });
 
+        /**
+        * zoom function that, when called, will change the center of the map to the
+        * lat and long passed in and change the zoom level.
+        */
+        self.zoom = function () {
+          map.setCenter(new google.maps.LatLng(this.lat, this.long));
+          map.setZoom(15);
+
+          google.maps.event.trigger(this.marker, "click");
+        };
       },
        error: function(data) {
          alert("Could not load data from foursquare!");
@@ -475,7 +476,8 @@ function initMap() {
          item.marker.setAnimation(null);
     });
   }, 500);
-    markers.push(item.marker);
+    markers.push(model[i].marker);
+
    });
 
    /**
