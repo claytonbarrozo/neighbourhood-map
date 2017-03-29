@@ -330,44 +330,6 @@ function initMap() {
 );
 
 /**
- * Get place-search element by ID
- */
-  // var input = $("#places-search");
-
-/**
- * New instance of place.Autocomplete stored in autocomplete variable.
- * Passing in input as a parameter.
- * @type {google}
- */
-//   var autocomplete = new google.maps.places.Autocomplete(input);
-//
-//   /**
-//    * bind the maps bounds property to the autocomplete object.
-//    */
-//    autocomplete.bindTo("bounds", map);
-//
-//    /**
-//     * Restrict the bounds to the defined bounds (defaultBounds)
-//     */
-//    autocomplete.setOptions({strictBounds: defaultBounds});
-//
-// /**
-//  * Add event listener to the autocomplete object.
-//  */
-//    google.maps.event.addListener(autocomplete, "place_changed",function(){
-//        var place = autocomplete.getPlace();
-//        if (!place.geometry){
-//            return;
-//        }
-//        if (place.geometry.viewport) {
-//            map.fitBounds(place.geometry.viewport);
-//        } else {
-//            map.setCenter(place.geometry.location);
-//            map.setZoom(17);
-//        }
-//    });
-
-/**
  * Location function that declares location propertys as observables.
  */
  function loc(data) {
@@ -388,11 +350,8 @@ function initMap() {
   /**
    * declare self.points and store model array in observableArray.
    */
-  self.location = ko.observableArray([]);
+  self.location = ko.observableArray(model);
 
-  model.forEach(function (item) {
-    self.location.push(new loc(item));
-  });
 
   /**
    * Declare observable which stores an empy string.
@@ -418,7 +377,7 @@ function initMap() {
  * foreach object in model, push new instance of 'loc', passing in item as a parameter.
  */
 
-   location.forEach(function (item) {
+   model.forEach(function (item) {
      self.places.push(new loc(item));
    });
 
@@ -490,11 +449,21 @@ function initMap() {
           "Recommended Food Joints in "+ item.marker.title +"</h4><div class='card mt-3'>" +
           "<div class='card-block'><h4>" + details.name + "</h4><h5>" + location.formattedAddress + "</h5><h5>" + details.contact.formattedPhone +"</h5></div></div>";
 
+          /**
+          * zoom function that, when called, will change the center of the map to the
+          * lat and long passed in and change the zoom level.
+          */
+          self.zoom = function () {
+            map.setCenter(new google.maps.LatLng(this.lat, this.long));
+            map.setZoom(15);
+          };
+          
         item.marker.addListener("click", function () {
-          infowindow.open(map, item.marker);
           infowindow.setContent(contentString);
+          infowindow.open(map, item.marker);
           this.setAnimation(google.maps.Animation.BOUNCE);
         });
+
       },
        error: function(data) {
          alert("Could not load data from foursquare!");
@@ -510,27 +479,11 @@ function initMap() {
    });
 
    /**
-    * zoom function that, when called, will change the center of the map to the
-    * lat and long passed in and change the zoom level.
-    */
-
-    function zoom () {
-      map.setCenter(new google.maps.LatLng(this.lat, this.long));
-      map.setZoom(14);
-    }
-   self.zoom = function (item) {
-     zoom();
-
-    infowindow.open(map, this.marker);
-   };
-
-   /**
     * reset function that, when called, will reset the zoom level to show all the markers.
     */
    self.reset = function () {
      map.setZoom(9);
    };
-
    /**
     * hide function that, when called, will loop through the markers array and
     * will set the map property for each marker to null.
