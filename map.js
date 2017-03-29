@@ -371,7 +371,7 @@ function initMap() {
     * the locations and checks to see if location title is the same as the text input.
     */
    self.search = ko.computed(function(){
-     
+
      for (var i = 0; i < markers.length; i++) {
        markers[i].setMap(null);
      }
@@ -492,6 +492,9 @@ function initMap() {
     */
    self.reset = function () {
      map.setZoom(9);
+     for (var i = 0; i < markers.length; i++) {
+       markers[i].setMap(map);
+     }
    };
    /**
     * hide function that, when called, will loop through the markers array and
