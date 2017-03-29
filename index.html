@@ -14,27 +14,23 @@
             <button class="btn btn-primary" data-bind="click: show">Show Listings</button>
             <button class="btn btn-secondary" data-bind="click: hide">Hide Listings</button>
           </div>
-          <form>
-            <input type="text" placeholder="Find New York Location" value=""
-              class="w-100 pl-2" id="places-search">
-              <small>*Press enter key to go to desired location</small>
-          </form>
           <h5 class="mt-3">Filter by Rating</h5>
-          <div class="row pl-1" data-bind="foreach: model">
+          <div class="row pl-1 rating_list" data-bind="foreach: model">
             <div class="col-4">
               <button data-bind="text: $data.rating, click: $parent.zoom"
-                class="btn btn-secondary mt-3 w-100">
+                class="btn btn-secondary mt-3 w-100 rating_button">
               </button>
             </div>
           </div>
+          <h5 class="mt-3">Locations</h5>
+          <form class="form-group mt-3">
+            <input class="controls pl-2" type="search" data-bind="textInput: query, valueUpdate: 'keyup'" placeholder="Search locations"></input>
+          </form>
           <div class="location_list">
-            <h5 class="mt-3">Filter by Location Name</h5>
             <div class="row">
               <div class="col-12">
-                <ul class="list-group" data-bind="foreach: model">
-                  <button class="btn btn-secondary btn-block list-group-item"
-                    data-bind="text: $data.title, click: $parent.zoom">
-                  </button>
+                <ul class="list-group" data-bind="foreach: search()">
+                    <li class="list-group-item" data-bind="text: title"></li>
                 </ul>
               </div>
             </div>
@@ -55,9 +51,9 @@
    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
    <link href="map.css" rel="stylesheet">
    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+   <script src="map.js"></script>
    <script async onerror="googleError()"
    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBy1J1EATIPkv0fdfMCl9S8XhFRfa_5Vy4&libraries=places&callback=initMap">
    </script>
-   <script src="map.js"></script>
   </body>
 </html>

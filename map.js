@@ -312,20 +312,17 @@ function initMap() {
 
 /**
  * Define empty array
- * @type {Array}
  */
   var markers = [];
 
   /**
    * Store new instance of google infoWindow in infowindow variable
-   * @type {google}
    */
   var infowindow = new google.maps.InfoWindow();
 
   /**
    * New instance of LatLngBounds stored in defaultBounds variable. Ready to be passed
    * in when restricting search on autocomplete.
-   * @type {google}
    */
   var defaultBounds = new google.maps.LatLngBounds(
    new google.maps.LatLng(-33.8902, 151.1759),
@@ -335,40 +332,40 @@ function initMap() {
 /**
  * Get place-search element by ID
  */
-  var input = document.getElementById("places-search");
+  // var input = $("#places-search");
 
 /**
  * New instance of place.Autocomplete stored in autocomplete variable.
  * Passing in input as a parameter.
  * @type {google}
  */
-  var autocomplete = new google.maps.places.Autocomplete(input);
-
-  /**
-   * bind the maps bounds property to the autocomplete object.
-   */
-   autocomplete.bindTo("bounds", map);
-
-   /**
-    * Restrict the bounds to the defined bounds (defaultBounds)
-    */
-   autocomplete.setOptions({strictBounds: defaultBounds});
-
-/**
- * Add event listener to the autocomplete object.
- */
-   google.maps.event.addListener(autocomplete, "place_changed",function(){
-       var place = autocomplete.getPlace();
-       if (!place.geometry){
-           return;
-       }
-       if (place.geometry.viewport) {
-           map.fitBounds(place.geometry.viewport);
-       } else {
-           map.setCenter(place.geometry.location);
-           map.setZoom(17);
-       }
-   });
+//   var autocomplete = new google.maps.places.Autocomplete(input);
+//
+//   /**
+//    * bind the maps bounds property to the autocomplete object.
+//    */
+//    autocomplete.bindTo("bounds", map);
+//
+//    /**
+//     * Restrict the bounds to the defined bounds (defaultBounds)
+//     */
+//    autocomplete.setOptions({strictBounds: defaultBounds});
+//
+// /**
+//  * Add event listener to the autocomplete object.
+//  */
+//    google.maps.event.addListener(autocomplete, "place_changed",function(){
+//        var place = autocomplete.getPlace();
+//        if (!place.geometry){
+//            return;
+//        }
+//        if (place.geometry.viewport) {
+//            map.fitBounds(place.geometry.viewport);
+//        } else {
+//            map.setCenter(place.geometry.location);
+//            map.setZoom(17);
+//        }
+//    });
 
 /**
  * Location function that declares location propertys as observables.
@@ -386,8 +383,27 @@ function initMap() {
  * Viewmodel function that deals with creating map markers and ajax requests.
  */
  function viewModel () {
-   var self = this;
+  var self = this;
 
+  /**
+   * declare self.points and store model array in observableArray.
+   */
+  self.location = ko.observableArray(model);
+
+  /**
+   * Declare observable which stores an empy string.
+   */
+  self.query = ko.observable('');
+
+  /**
+   * computed observable function which returns an array filter which passes in
+   * the locations and checks to see if location title is the same as the text input.
+   */
+  self.search = ko.computed(function(){
+    return ko.utils.arrayFilter(self.location(), function(location){
+      return location.title.toLowerCase().indexOf(self.query().toLowerCase()) >= 0;
+    });
+  });
    /**
     * this.places is equal to an empty observableArray.
     */
@@ -455,41 +471,51 @@ function initMap() {
      * If ajax request throws an error then alert the following string.
      */
      $.ajax({
-       method: "GET",
        url: "https://api.foursquare.com/v2/venues/explore",
        dataType: "json",
        data: data,
+       async: true,
        success: function(data) {
          var location = data.response.groups[0].items[0].venue.location;
          var details = data.response.groups[0].items[0].venue;
 
-         var contentString = "<h2>" + item.marker.title + "</h2><br><iframe src='"+ format +"'></iframe><h4 class='mt-3'>Recommended Food Joints in "+ item.marker.title +"</h4><div class='card mt-3'><div class='card-block'><h4>" + details.name +"</h4><h5>" + location.address +"</h5><h5>" + details.contact.formattedPhone +"</h5></div></div>";
-          infowindow = new google.maps.InfoWindow({
-            content: contentString
-          });
-          item.marker.addListener("click", function () {
-            infowindow.open(map, item.marker);
-            this.setAnimation(google.maps.Animation.BOUNCE);
-          });
+         var contentString = "<h2>" + item.marker.title + "</h2><br>" +
+          "<iframe src='"+ format +"'></iframe><h4 class='mt-3'>" +
+          "Recommended Food Joints in "+ item.marker.title +"</h4><div class='card mt-3'>" +
+          "<div class='card-block'><h4>" + details.name + "</h4><h5>" + location.formattedAddress + "</h5><h5>" + details.contact.formattedPhone +"</h5></div></div>";
 
-          google.maps.event.addDomListener(infowindow, "closeclick", function() {
-           item.marker.setAnimation(null);
-         });
-         markers.push(item.marker);
-       },
+        item.marker.addListener("click", function () {
+          infowindow.open(map, item.marker);
+          infowindow.setContent(contentString);
+          this.setAnimation(google.maps.Animation.BOUNCE);
+        });
+      },
        error: function(data) {
          alert("Could not load data from foursquare!");
        }
      });
+
+     setTimeout(function () {
+     google.maps.event.addDomListener(infowindow, "closeclick", function() {
+         item.marker.setAnimation(null);
+    });
+  }, 500);
+    markers.push(item.marker);
    });
 
    /**
     * zoom function that, when called, will change the center of the map to the
     * lat and long passed in and change the zoom level.
     */
-   self.zoom = function () {
-     map.setCenter(new google.maps.LatLng(this.lat, this.long));
-     map.setZoom(14);
+
+    function zoom () {
+      map.setCenter(new google.maps.LatLng(this.lat, this.long));
+      map.setZoom(14);
+    }
+   self.zoom = function (item) {
+     zoom();
+
+    infowindow.open(map, this.marker);
    };
 
    /**
@@ -505,7 +531,7 @@ function initMap() {
     */
    self.hide = function () {
      for (var i = 0; i < markers.length; i++) {
-       markers[i].setMap(null);
+       markers[i].setVisible(false);
      };
    };
 
@@ -516,7 +542,7 @@ function initMap() {
     */
    self.show = function () {
      for (var i = 0; i < markers.length; i++) {
-       markers[i].setMap(map);
+       markers[i].setVisible(true);
      };
    };
  };
