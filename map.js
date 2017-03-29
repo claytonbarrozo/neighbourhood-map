@@ -458,7 +458,7 @@ function initMap() {
         model[i].marker.addListener("click", function () {
           infowindow.setContent(contentString);
           infowindow.open(map, model[i].marker);
-          setTimeout (function () {
+          window.setTimeout (function () {
             model[i].marker.setAnimation(google.maps.Animation.BOUNCE);
           }, 700);
         });
@@ -478,12 +478,9 @@ function initMap() {
        }
      });
 
-     setTimeout(function () {
      google.maps.event.addDomListener(infowindow, "closeclick", function() {
          model[i].marker.setAnimation(null);
     });
-
-  }, 500);
     markers.push(model[i].marker);
 
    });
