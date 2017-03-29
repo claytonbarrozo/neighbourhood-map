@@ -388,12 +388,17 @@ function initMap() {
   /**
    * declare self.points and store model array in observableArray.
    */
-  self.location = ko.observableArray(model);
+  self.location = ko.observableArray([]);
+
+  model.forEach(function (item) {
+    self.location.push(new loc(item));
+  });
 
   /**
    * Declare observable which stores an empy string.
    */
   self.query = ko.observable('');
+
 
   /**
    * computed observable function which returns an array filter which passes in
@@ -412,7 +417,8 @@ function initMap() {
 /**
  * foreach object in model, push new instance of 'loc', passing in item as a parameter.
  */
-   model.forEach(function (item) {
+
+   location.forEach(function (item) {
      self.places.push(new loc(item));
    });
 
